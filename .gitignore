@@ -41,7 +41,10 @@ venv.bak/
 *.swo
 
 # Project specific
-results/*.mp4
+*.mp4
 results/raw/
 *.log
 .pytest_cache/
+.numba_cache/
+*.numba_cache/
+

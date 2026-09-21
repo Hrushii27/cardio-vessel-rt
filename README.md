@@ -103,10 +103,10 @@ flowchart TD
 | `upsample_blend` | 0.74 ms | 1.83 ms | Full-resolution reconstruction and detail blend |
 | **Total Pipeline** | **16.42 ms** | **17.87 ms** | **Both resolutions $\le 36$ ms constraint** |
 
-Benchmark graphs generated automatically by `scripts/benchmark.py`:
-- Latency histogram: `results/benchmark/latency_histogram.png`
-- Consecutive frame timeline trace: `results/benchmark/latency_timeseries.png`
-- Stage breakdown: `results/benchmark/stage_breakdown.png`
+### Benchmark Visualizations
+| Latency Distribution (P99 <= 23.3ms) | Per-Stage Execution Times |
+| :---: | :---: |
+| ![Latency Histogram](results/benchmark/latency_histogram.png) | ![Stage Breakdown](results/benchmark/stage_breakdown.png) |
 
 ---
 
@@ -117,9 +117,14 @@ Each processed frame generates three clinical outputs:
 2. **Processed Image:** Anatomical background suppressed (ribs, spine, lungs, and noise eliminated).
 3. **Enhanced Coronary Image:** Contrast-boosted coronary tree with sharp bifurcations, stenoses, and fine distal branches highlighted.
 
-Inspection composite panels are saved under `results/single_frames/comparisons/`:
-- `frame_0015_comparison.png` ($512\times 512$)
-- `frame_0005_comparison.png` ($1024\times 1024$)
+### Frame 15 (512x512): Raw vs. Background-Suppressed vs. Enhanced Coronary Artery Tree
+![512x512 Clinical Comparison](results/single_frames/comparisons/frame_0015_comparison.png)
+
+### Frame 5 (1024x1024 High-Resolution Cine): Full-Resolution Diagnostic Detail
+![1024x1024 Clinical Comparison](results/single_frames/comparisons/frame_0005_comparison.png)
+
+### Quantitative Metrics Grid (CNR, BSR, Noise Reduction)
+![Evaluation Metric Grid](results/evaluation/evaluation_figure_grid.png)
 
 ---
 
@@ -132,7 +137,7 @@ Inspection composite panels are saved under `results/single_frames/comparisons/`
 ### Installation Steps
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-username/cardio-vessel-rt.git
+git clone https://github.com/Hrushi277/cardio-vessel-rt.git
 cd cardio-vessel-rt
 
 # 2. Create virtual environment

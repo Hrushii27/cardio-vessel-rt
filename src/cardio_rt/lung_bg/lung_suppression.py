@@ -132,8 +132,9 @@ class LungBackgroundSuppression:
         # Coarse structure band
         if len(lp) > 2:
             lp[-2] *= self.mid_coarse_weight
-        # Base residual: severe attenuation of lung fields
-        lp[-1] *= self.coarse_band_weight
+        # Base residual: severe attenuation of lung fields while preserving DC tissue baseline
+        base_mean = float(np.mean(lp[-1]))
+        lp[-1] = base_mean + self.coarse_band_weight * (lp[-1] - base_mean)
 
         reconstructed = self._reconstruct_laplacian_pyramid(lp)
 

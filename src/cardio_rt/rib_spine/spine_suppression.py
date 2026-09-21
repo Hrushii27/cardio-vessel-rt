@@ -34,8 +34,9 @@ class SpineSuppression:
     def allocate_buffers(self, shape: tuple[int, int]) -> None:
         """Preallocate memory buffers for zero allocations during processing."""
         h, w = shape
-        # Subsampled 1/2 resolution for low-frequency spine estimation
-        ds_h, ds_w = h // 2, w // 2
+        # Subsampled 128-scale resolution for low-frequency spine estimation
+        ds_h = min(128, h)
+        ds_w = min(128, w)
         self._buffers = {
             "ds_input": np.empty((ds_h, ds_w), dtype=np.float32),
             "ds_spine": np.empty((ds_h, ds_w), dtype=np.float32),
@@ -60,26 +61,39 @@ class SpineSuppression:
         ds_in = self._buffers["ds_input"]
         ds_spine = self._buffers["ds_spine"]
         up_spine = self._buffers["up_spine"]
+        ds_h, ds_w = ds_in.shape[:2]
 
-        # Downsample 2x to isolate macro structures and maximize speed (< 0.5 ms)
-        cv2.resize(od_map, (ds_in.shape[1], ds_in.shape[0]), dst=ds_in, interpolation=cv2.INTER_AREA)
+        # Subsample to 128-scale working resolution
+        cv2.resize(od_map, (ds_w, ds_h), dst=ds_in, interpolation=cv2.INTER_AREA)
 
-        # Anisotropic separable filtering: large sigma along Y (vertical column), moderate along X
-        # Scaled down to half-res coordinates
-        sy = max(3.0, self.sigma_vertical / 2.0)
-        sx = max(2.0, self.sigma_horizontal / 2.0)
+        # Eliminate narrow vertical coronary arteries using a horizontal morphological opening
+        # (width 15 px at 128x128 corresponds to 60 px full-res, leaving only broad vertebral structures)
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 1))
+        ds_open = cv2.morphologyEx(ds_in, cv2.MORPH_OPEN, kernel)
+
+        # Large anisotropic Gaussian kernel: large vertical sigma, narrow horizontal sigma
+        # to isolate the contiguous vertical spine column
+        sx = self.sigma_horizontal * (ds_w / w)
+        sy = self.sigma_vertical * (ds_h / h)
 
         # Separable Gaussian filters
-        cv2.GaussianBlur(ds_in, (0, 0), sigmaX=sx, sigmaY=sy, dst=ds_spine, borderType=cv2.BORDER_REFLECT)
+        cv2.GaussianBlur(ds_open, (0, 0), sigmaX=sx, sigmaY=sy, dst=ds_spine, borderType=cv2.BORDER_REFLECT)
 
-        # Upsample back to full resolution
-        cv2.resize(ds_spine, (w, h), dst=up_spine, interpolation=cv2.INTER_LINEAR)
+        # Estimate horizontal flank baseline away from central column on ds_spine (< 0.1 ms)
+        ds_w = ds_spine.shape[1]
+        flank_l = np.mean(ds_spine[:, int(ds_w * 0.10):int(ds_w * 0.22)], axis=1, keepdims=True)
+        flank_r = np.mean(ds_spine[:, int(ds_w * 0.78):int(ds_w * 0.90)], axis=1, keepdims=True)
+        flank_base = 0.5 * (flank_l + flank_r)
+        excess_ds = np.maximum(0.0, ds_spine - flank_base)
+
+        # Upsample excess back to full resolution
+        cv2.resize(excess_ds, (w, h), dst=up_spine, interpolation=cv2.INTER_LINEAR)
 
         # Spine is primarily located in the central vertical corridor.
         # Construct soft horizontal window weighting to isolate central column:
         x_coords = np.linspace(-1.0, 1.0, w, dtype=np.float32)
         # Vertebral column profile: Gaussian centered horizontally
-        spine_weight = np.exp(-0.5 * (x_coords / 0.5) ** 2)[np.newaxis, :]
+        spine_weight = np.exp(-0.5 * (x_coords / 0.35) ** 2)[np.newaxis, :]
 
         bone_map = self._buffers["bone_map"]
         np.multiply(up_spine, spine_weight, out=bone_map)

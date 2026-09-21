@@ -25,12 +25,37 @@ def to_8bit_display(
     Never used in the internal computation pipeline - purely for display and GUI rendering.
     """
     arr = img.astype(np.float32)
-    vmin = np.percentile(arr, p_low)
-    vmax = np.percentile(arr, p_high)
+    dark_thresh = 1000.0 if arr.max() > 255.0 else 5.0
+    dark = (arr <= dark_thresh).astype(np.uint8)
+
+    # Detect external collimator shutter border by flood-filling from the 4 corners
+    h, w = dark.shape
+    flood_ws = np.zeros((h + 2, w + 2), dtype=np.uint8)
+    for pt in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)]:
+        if dark[pt[1], pt[0]]:
+            cv2.floodFill(dark, flood_ws, pt, 2)
+    is_border = (dark == 2)
+    border_fraction = float(np.mean(is_border))
+
+    if border_fraction > 0.05 and border_fraction < 0.80:
+        active = arr[~is_border]
+        if active.size > 0:
+            vmin = float(np.percentile(active, p_low))
+            vmax = float(np.percentile(active, p_high))
+        else:
+            vmin = float(np.percentile(arr, p_low))
+            vmax = float(np.percentile(arr, p_high))
+    else:
+        vmin = float(np.percentile(arr, p_low))
+        vmax = float(np.percentile(arr, p_high))
+
     if vmax <= vmin:
         vmax = vmin + 1.0
     norm = np.clip((arr - vmin) / (vmax - vmin), 0.0, 1.0)
-    return (norm * 255.0).astype(np.uint8)
+    out8 = (norm * 255.0).astype(np.uint8)
+    if border_fraction > 0.05 and border_fraction < 0.80:
+        out8[is_border] = 0
+    return out8
 
 
 def load_image(path: str | Path) -> Tuple[np.ndarray, dict[str, Any]]:

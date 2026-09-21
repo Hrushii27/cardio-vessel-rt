@@ -7,7 +7,7 @@ coronary enhancement, and contrast enhancement with microsecond latency profilin
 from __future__ import annotations
 
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Optional, Dict, Any, Tuple
 import numpy as np
 import cv2
@@ -55,35 +55,35 @@ class PipelineConfig:
 
     # Rib Suppression
     rib_sigma: float = 14.0
-    rib_strength: float = 0.65
+    rib_strength: float = 0.75
     rib_subsample: int = 4
 
     # Lung Background Suppression
     lung_pyramid_levels: int = 4
-    lung_coarse_weight: float = 0.12
-    lung_mid_coarse_weight: float = 0.35
-    lung_vessel_band_weight: float = 1.0
-    lung_fine_weight: float = 0.70
+    lung_coarse_weight: float = 0.15
+    lung_mid_coarse_weight: float = 0.55
+    lung_vessel_band_weight: float = 1.25
+    lung_fine_weight: float = 0.95
     lung_flat_field: bool = False
 
     # Vesselness Enhancement
     vessel_scales: Tuple[float, ...] = (1.5, 3.0)
     vessel_method: str = "frangi"  # "frangi", "sato"
     vessel_beta: float = 0.5
-    vessel_c: float = 12.0
-    vessel_gain_strength: float = 1.5
+    vessel_c: float = 0.22
+    vessel_gain_strength: float = 2.0
     vessel_subsample: int = 2  # Subsampling factor for vesselness calculation
 
     # Contrast Enhancement
-    clahe_clip_limit: float = 2.0
+    clahe_clip_limit: float = 1.2
     clahe_grid_size: Tuple[int, int] = (2, 2)
     tone_gamma: float = 0.90
-    unsharp_strength: float = 0.50
+    unsharp_strength: float = 0.35
     unsharp_radius: int = 2
 
     # High-Resolution Real-Time Multiscale Architecture
     multiscale_mode: bool = True
-    max_working_res: int = 384
+    max_working_res: int = 512
 
 
 @dataclass
@@ -105,7 +105,7 @@ class CardioPipeline:
 
     def __init__(self, config: Optional[PipelineConfig] = None):
         self.config = config or PipelineConfig()
-        cv2.setNumThreads(4)
+        cv2.setNumThreads(8)
         self.pool = PipelineMemoryPool((512, 512))
         self._working_pipeline: Optional[CardioPipeline] = None
 
@@ -157,13 +157,8 @@ class CardioPipeline:
 
         self._current_shape: Optional[Tuple[int, int]] = None
         if self.config.multiscale_mode:
-            work_cfg = PipelineConfig(
-                enable_noise_suppression=self.config.enable_noise_suppression,
-                enable_rib_suppression=self.config.enable_rib_suppression,
-                enable_spine_suppression=self.config.enable_spine_suppression,
-                enable_lung_background_suppression=self.config.enable_lung_background_suppression,
-                enable_coronary_enhancement=self.config.enable_coronary_enhancement,
-                enable_contrast_enhancement=self.config.enable_contrast_enhancement,
+            work_cfg = replace(
+                self.config,
                 multiscale_mode=False,
                 vessel_subsample=2,
             )
@@ -244,6 +239,14 @@ class CardioPipeline:
             epsilon=1e-4,
             out=log_od,
         )
+        # Condition collimator shutter: fill non-diagnostic border with tissue baseline
+        # to prevent artificial border singularities (-ln(0)=9.21) from bleeding into spatial filters
+        if collimator_mask is not None:
+            active_m = (collimator_mask > 0)
+            if not np.all(active_m) and np.any(active_m):
+                base_od_sub = log_od[active_m]
+                base_val = float(np.mean(base_od_sub[::4]))
+                log_od[~active_m] = base_val
         stage_times["log_transform"] = (time.perf_counter_ns() - t0) / 1e6
 
         # ----------------------------------------------------
@@ -336,14 +339,16 @@ class CardioPipeline:
         proc_u16 = self.pool.get("processed_u16", shape)
         enh_u16 = self.pool.get("enhanced_u16", shape)
 
-        # Robust mapping to [0, 65535]
-        np.multiply(processed_linear, 65535.0, out=self.pool.get("scratch_f32_1", shape))
-        np.clip(self.pool.get("scratch_f32_1", shape), 0, 65535, out=self.pool.get("scratch_f32_1", shape))
-        proc_u16[...] = self.pool.get("scratch_f32_1", shape).astype(np.uint16)
+        # Robust mapping to [0, 65535] with zero-allocation unsafe copy
+        s1 = self.pool.get("scratch_f32_1", shape)
+        np.multiply(processed_linear, 65535.0, out=s1)
+        np.clip(s1, 0, 65535, out=s1)
+        np.copyto(proc_u16, s1, casting="unsafe")
 
-        np.multiply(enhanced_linear, 65535.0, out=self.pool.get("scratch_f32_2", shape))
-        np.clip(self.pool.get("scratch_f32_2", shape), 0, 65535, out=self.pool.get("scratch_f32_2", shape))
-        enh_u16[...] = self.pool.get("scratch_f32_2", shape).astype(np.uint16)
+        s2 = self.pool.get("scratch_f32_2", shape)
+        np.multiply(enhanced_linear, 65535.0, out=s2)
+        np.clip(s2, 0, 65535, out=s2)
+        np.copyto(enh_u16, s2, casting="unsafe")
 
         stage_times["output_quantization"] = (time.perf_counter_ns() - t0) / 1e6
 

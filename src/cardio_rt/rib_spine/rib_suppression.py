@@ -73,10 +73,12 @@ class RibSuppression:
 
         # Scale down sigma to the subsampled coordinate system
         ds_sigma = max(1.5, self.bone_scale_sigma / self.subsample_factor)
-        ksize = int(round(ds_sigma * 6)) | 1  # ensure odd
+        # Eliminate narrow coronary vessels (< 2 px at subsampled scale) using a small opening
+        k_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        ds_opened = cv2.morphologyEx(ds_in, cv2.MORPH_OPEN, k_open)
 
-        # Gaussian smoothing
-        cv2.GaussianBlur(ds_in, (ksize, ksize), ds_sigma, dst=ds_smooth, borderType=cv2.BORDER_REFLECT)
+        # Smooth at subsampled scale to eliminate noise while isolating bone ridges
+        cv2.GaussianBlur(ds_opened, (0, 0), sigmaX=ds_sigma, sigmaY=ds_sigma, dst=ds_smooth, borderType=cv2.BORDER_REFLECT)
 
         # Compute 2nd derivatives using Sobel
         cv2.Sobel(ds_smooth, cv2.CV_32F, 2, 0, dst=dxx, ksize=3)
@@ -108,8 +110,9 @@ class RibSuppression:
         # Upscale back to full resolution
         cv2.resize(ds_rib, (w, h), dst=rib_map, interpolation=cv2.INTER_LINEAR)
 
-        # Multiply by local optical density to preserve natural bone attenuation proportion
-        np.multiply(rib_map, od_map, out=rib_map)
+        # Scale by calibrated rib bone attenuation depth in optical density space (~0.25 OD)
+        # Avoid multiplying by raw od_map which falsely scales up high-density crossing vessels
+        np.multiply(rib_map, 0.25, out=rib_map)
 
         return rib_map
 

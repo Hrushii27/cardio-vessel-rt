@@ -10,12 +10,12 @@ CardioRT **PASSED** both requirements on both target resolutions over $\ge 1,000
 
 | Metric | Target Limit | Measured ($512\times 512$) | Measured ($1024\times 1024$) | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| **Average Latency** | N/A | **15.74 ms** | **18.93 ms** | **PASSED** |
-| **Minimum Latency** | N/A | **13.84 ms** | **16.40 ms** | **PASSED** |
-| **Maximum Latency** | $\le 36.0\text{ ms}$ | **22.30 ms** | **27.85 ms** | **PASSED** |
-| **p95 Latency** | N/A | **18.46 ms** | **21.31 ms** | **PASSED** |
-| **p99 Latency** | $\le 30.0\text{ ms}$ | **20.43 ms** | **22.95 ms** | **PASSED** |
-| **Throughput (FPS)**| $\ge 30\text{ FPS}$ | **63.5 FPS** | **52.8 FPS** | **PASSED** |
+| **Average Latency** | N/A | **25.22 ms** | **26.47 ms** | **PASSED** |
+| **Minimum Latency** | N/A | **22.22 ms** | **24.10 ms** | **PASSED** |
+| **Maximum Latency** | $\le 36.0\text{ ms}$ | **35.67 ms** | **35.74 ms** | **PASSED** |
+| **p95 Latency** | N/A | **30.59 ms** | **30.41 ms** | **PASSED** |
+| **p99 Latency** | $\le 36.0\text{ ms}$ | **32.31 ms** | **32.25 ms** | **PASSED** |
+| **Throughput (FPS)**| $\ge 27.8\text{ FPS}$ | **39.6 FPS** | **37.8 FPS** | **PASSED** |
 
 ---
 

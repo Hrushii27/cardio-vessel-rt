@@ -17,9 +17,9 @@
 - **Mandatory Constraint:** Maximum latency $\le 36.0\text{ ms}$ per frame (measured from raw frame input to final processed frame output).
 - **Internal Safety Margin:** $p99 \le 30.0\text{ ms}$.
 - **Measured Performance (AMD Ryzen 7 5700U, 8 Cores, No Dedicated GPU):**
-  - **$512\times 512$:** **$14.67\text{ ms}$ average**, **$18.67\text{ ms}$ maximum** (**68.2 FPS**)
-  - **$1024\times 1024$:** **$16.66\text{ ms}$ average**, **$21.66\text{ ms}$ maximum** (**60.0 FPS**)
-  - Every benchmark number is strictly measured on local hardware via `scripts/benchmark.py`.
+  - **$512\times 512$:** **$15.74\text{ ms}$ average**, **$22.30\text{ ms}$ maximum** (**63.5 FPS**)
+  - **$1024\times 1024$:** **$18.93\text{ ms}$ average**, **$27.85\text{ ms}$ maximum** (**52.8 FPS**)
+  - Every benchmark number is strictly measured on local hardware via `scripts/benchmark.py` over 1,000 consecutive frames.
 
 ---
 
@@ -72,7 +72,7 @@ flowchart TD
 ## 3. Real Benchmark Results & Hardware Profile
 
 > [!NOTE]
-> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 500` on this machine. No estimates, extrapolations, or synthetic hardcoded figures.
+> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 1000` on this machine. No estimates, extrapolations, or synthetic hardcoded figures.
 
 ### Test Environment
 - **CPU:** AMD Ryzen 7 5700U with Radeon Graphics (8 Physical Cores, 16 Logical Threads, 1.8 GHz base / 4.3 GHz boost)
@@ -81,30 +81,30 @@ flowchart TD
 - **Operating System:** Windows 11 (build 10.0.22631)
 - **Runtime:** Python 3.11.0, OpenCV 5.0.0, NumPy 2.4.6, Numba 0.67.0
 
-### Latency Benchmark Summary
+### Latency Benchmark Summary ($\ge 1,000$ Frames Tested)
 | Resolution | Frames Tested | Avg Latency | Min Latency | Max Latency | p95 Latency | p99 Latency | Real-Time FPS | Hard Limit ($\le 36$ ms) | Target ($p99 \le 30$ ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$512\times 512$** | 500 | **14.67 ms** | 13.59 ms | **18.67 ms** | 16.35 ms | **17.48 ms** | **68.2 FPS** | **PASSED** | **PASSED** |
-| **$1024\times 1024$** | 500 | **16.66 ms** | 15.47 ms | **21.66 ms** | 18.98 ms | **20.64 ms** | **60.0 FPS** | **PASSED** | **PASSED** |
+| **$512\times 512$** | 1,000 | **15.74 ms** | 13.84 ms | **22.30 ms** | 18.46 ms | **20.43 ms** | **63.5 FPS** | **PASSED** | **PASSED** |
+| **$1024\times 1024$** | 1,000 | **18.93 ms** | 16.40 ms | **27.85 ms** | 21.31 ms | **22.95 ms** | **52.8 FPS** | **PASSED** | **PASSED** |
 
 ### Per-Stage Latency Breakdown (Average per Frame)
 | Stage Name | $512\times 512$ (ms) | $1024\times 1024$ (ms) | Functional Role |
 | :--- | :---: | :---: | :--- |
-| `downsample_input` | 0.54 ms | 1.58 ms | Working scale subsampling for high-res frames |
-| `ingest_preprocess` | 1.31 ms | 1.32 ms | Percentile windowing & shutter mask |
-| `log_transform` | 0.52 ms | 0.52 ms | Beer-Lambert optical density space mapping |
-| `noise_suppression` | 0.20 ms | 0.21 ms | Edge-preserving spatial Gaussian/guided denoise |
-| `spine_suppression` | 1.26 ms | 1.27 ms | Anisotropic vertical spine bone map subtraction |
-| `rib_suppression` | 1.09 ms | 1.10 ms | Large-scale Hessian ridge bone map subtraction |
-| `lung_background_suppression` | 1.98 ms | 1.44 ms | Laplacian pyramid multi-band attenuation |
-| `coronary_enhancement` | 1.60 ms | 1.65 ms | Multi-scale Frangi vesselness with soft gain map |
-| `contrast_enhancement` | 3.20 ms | 3.20 ms | 16-bit CLAHE and vessel-guided unsharp mask |
-| `output_quantization` | 0.72 ms | 0.73 ms | Conversion to 16-bit uint16 tensor buffers |
-| `upsample_blend` | 0.69 ms | 2.08 ms | Full-resolution reconstruction and detail blend |
-| **Total Pipeline** | **14.67 ms** | **16.66 ms** | **Both resolutions $\le 36$ ms constraint** |
+| `downsample_input` | 0.57 ms | 1.64 ms | Working scale subsampling for high-res frames |
+| `ingest_preprocess` | 1.40 ms | 1.44 ms | Percentile windowing & shutter mask |
+| `log_transform` | 0.55 ms | 0.58 ms | Beer-Lambert optical density space mapping |
+| `noise_suppression` | 0.23 ms | 0.23 ms | Edge-preserving spatial Gaussian/guided denoise |
+| `spine_suppression` | 1.36 ms | 1.40 ms | Anisotropic vertical spine bone map subtraction |
+| `rib_suppression` | 1.16 ms | 1.17 ms | Large-scale Hessian ridge bone map subtraction |
+| `lung_background_suppression` | 2.17 ms | 2.31 ms | Laplacian pyramid multi-band attenuation |
+| `coronary_enhancement` | 1.76 ms | 1.83 ms | Multi-scale Frangi vesselness with soft gain map |
+| `contrast_enhancement` | 3.43 ms | 3.59 ms | 16-bit CLAHE and vessel-guided unsharp mask |
+| `output_quantization` | 0.77 ms | 0.79 ms | Conversion to 16-bit uint16 tensor buffers |
+| `upsample_blend` | 0.72 ms | 2.22 ms | Full-resolution reconstruction and detail blend |
+| **Total Pipeline** | **15.74 ms** | **18.93 ms** | **Both resolutions $\le 36$ ms constraint** |
 
 ### Benchmark Visualizations
-| Latency Distribution (P99 <= 23.3ms) | Per-Stage Execution Times |
+| Latency Distribution (P99 <= 23.0ms) | Per-Stage Execution Times |
 | :---: | :---: |
 | ![Latency Histogram](results/benchmark/latency_histogram.png) | ![Stage Breakdown](results/benchmark/stage_breakdown.png) |
 
@@ -137,7 +137,7 @@ Each processed frame generates three clinical outputs:
 ### Installation Steps
 ```bash
 # 1. Clone repository
-git clone https://github.com/Hrushi277/cardio-vessel-rt.git
+git clone https://github.com/Hrushii27/cardio-vessel-rt.git
 cd cardio-vessel-rt
 
 # 2. Create virtual environment

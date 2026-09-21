@@ -1,6 +1,6 @@
 # Benchmark Results: Real-Time Performance
 
-**Benchmark Run Date:** 2026-09-21 17:14:50 UTC
+**Benchmark Run Date:** 2026-09-21 17:25:45 UTC
 
 ### Hardware Configuration
 - **CPU Model:** 1801           AMD Ryzen 7 5700U with Radeon Graphics
@@ -13,20 +13,20 @@
 ### Latency & Throughput Measurements (>= 1,000 Frames Measured)
 | Resolution | Frames Tested | Avg Latency (ms) | Min (ms) | Max (ms) | p95 (ms) | p99 (ms) | FPS | Hard Limit (<=36 ms) | Margin Target (p99<=30ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **512x512** | 500 | **14.67** | 13.59 | **18.67** | 16.35 | **17.48** | **68.2** | **PASSED** | **PASSED** |
-| **1024x1024** | 500 | **16.66** | 15.47 | **21.66** | 18.98 | **20.64** | **60.0** | **PASSED** | **PASSED** |
+| **512x512** | 1000 | **15.74** | 13.84 | **22.3** | 18.46 | **20.43** | **63.5** | **PASSED** | **PASSED** |
+| **1024x1024** | 1000 | **18.93** | 16.4 | **27.85** | 21.31 | **22.95** | **52.8** | **PASSED** | **PASSED** |
 
 ### Per-Stage Latency Breakdown (Average ms per Frame)
 | Stage Name | 512x512 (ms) | 1024x1024 (ms) | Notes |
 | :--- | :---: | :---: | :--- |
-| `contrast_enhancement` | 3.204 | 3.195 | 16-bit CLAHE and vessel-guided unsharp mask |
-| `coronary_enhancement` | 1.603 | 1.645 | Multi-scale Frangi vesselness with soft gain map |
-| `downsample_input` | 0.541 | 1.582 | Multiscale working resolution subsampling |
-| `ingest_preprocess` | 1.31 | 1.317 | Percentile windowing + lead shutter border detection |
-| `log_transform` | 0.515 | 0.515 | Beer-Lambert optical density space mapping |
-| `lung_background_suppression` | 1.977 | 1.438 | Laplacian pyramid multi-band attenuation |
-| `noise_suppression` | 0.203 | 0.206 | Edge-preserving spatial Gaussian/guided denoise |
-| `output_quantization` | 0.718 | 0.725 | Conversion to 16-bit uint16 tensor buffers |
-| `rib_suppression` | 1.089 | 1.101 | Large-scale Hessian ridge bone map subtraction |
-| `spine_suppression` | 1.256 | 1.273 | Anisotropic vertical spine bone map subtraction |
-| `upsample_blend` | 0.692 | 2.082 | Full-resolution reconstruction and detail blend |
+| `contrast_enhancement` | 3.425 | 3.586 | 16-bit CLAHE and vessel-guided unsharp mask |
+| `coronary_enhancement` | 1.76 | 1.83 | Multi-scale Frangi vesselness with soft gain map |
+| `downsample_input` | 0.567 | 1.638 | Multiscale working resolution subsampling |
+| `ingest_preprocess` | 1.402 | 1.438 | Percentile windowing + lead shutter border detection |
+| `log_transform` | 0.548 | 0.576 | Beer-Lambert optical density space mapping |
+| `lung_background_suppression` | 2.169 | 2.309 | Laplacian pyramid multi-band attenuation |
+| `noise_suppression` | 0.234 | 0.234 | Edge-preserving spatial Gaussian/guided denoise |
+| `output_quantization` | 0.765 | 0.788 | Conversion to 16-bit uint16 tensor buffers |
+| `rib_suppression` | 1.158 | 1.174 | Large-scale Hessian ridge bone map subtraction |
+| `spine_suppression` | 1.359 | 1.399 | Anisotropic vertical spine bone map subtraction |
+| `upsample_blend` | 0.719 | 2.22 | Full-resolution reconstruction and detail blend |

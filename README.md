@@ -72,7 +72,7 @@ flowchart TD
 ## 3. Real Benchmark Results & Hardware Profile
 
 > [!NOTE]
-> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 1000` on this machine. No estimates, extrapolations, or synthetic hardcoded figures.
+> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 1000` on the author's local dedicated machine (AMD Ryzen 7 5700U 8-Core processor). No estimates, extrapolations, or synthetic hardcoded figures. (GitHub Actions CI runs on virtualized 2-vCPU shared runners where a relaxed threshold is used).
 
 ### Test Environment
 - **CPU:** AMD Ryzen 7 5700U with Radeon Graphics (8 Physical Cores, 16 Logical Threads, 1.8 GHz base / 4.3 GHz boost)

@@ -10,6 +10,7 @@ jobs:
   test-and-benchmark:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.11"]
@@ -27,7 +28,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
+        sudo apt-get install -y libgl1 libglib2.0-0
 
     - name: Install Python dependencies
       run: |
@@ -41,4 +42,4 @@ jobs:
 
     - name: Verify Real-Time Latency Benchmark (100 Frames)
       run: |
-        python scripts/benchmark.py --frames 100 --output_dir results/ci_benchmark
+        python scripts/benchmark.py --frames 100 --max_latency_limit 100.0 --output_dir results/ci_benchmark

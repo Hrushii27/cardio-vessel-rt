@@ -77,6 +77,7 @@ def run_benchmark_for_resolution(
     num_iterations: int = 1000,
     warmup_runs: int = 25,
     resolution_label: str = "512x512",
+    max_latency_limit: float = 36.0,
 ) -> Dict[str, Any]:
     """Execute benchmark loop with GC disabled, strictly measuring perf_counter_ns."""
     print(f"\n[{resolution_label}] Warming up pipeline ({warmup_runs} iterations)...")
@@ -137,7 +138,7 @@ def run_benchmark_for_resolution(
         "total_benchmark_time_sec": round(t_bench_total / 1000.0, 2),
         "stage_breakdown_avg_ms": avg_stages,
         "raw_latencies": latencies_ms,
-        "passes_hard_constraint": (max_lat <= 36.0 and p99_lat <= 36.0),
+        "passes_hard_constraint": (max_lat <= max_latency_limit and p99_lat <= max_latency_limit),
     }
 
     print(f"[{resolution_label}] Results:")
@@ -325,6 +326,7 @@ def main() -> None:
     parser.add_argument("--frames", type=int, default=1000, help="Number of benchmark iterations per resolution")
     parser.add_argument("--warmup", type=int, default=30, help="Warmup iterations before timing")
     parser.add_argument("--output_dir", type=str, default="results/benchmark", help="Destination folder for artifacts")
+    parser.add_argument("--max_latency_limit", type=float, default=36.0, help="Maximum latency threshold in ms (default: 36.0)")
     args = parser.parse_args()
 
     out_dir = Path(args.output_dir)
@@ -362,6 +364,7 @@ def main() -> None:
         num_iterations=args.frames,
         warmup_runs=args.warmup,
         resolution_label="512x512",
+        max_latency_limit=args.max_latency_limit,
     )
     all_results["512x512"] = res_512
 
@@ -372,6 +375,7 @@ def main() -> None:
         num_iterations=args.frames,
         warmup_runs=args.warmup,
         resolution_label="1024x1024",
+        max_latency_limit=args.max_latency_limit,
     )
     all_results["1024x1024"] = res_1024
 

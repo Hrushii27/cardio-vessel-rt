@@ -1,0 +1,71 @@
+{
+  "hardware": {
+    "os": "Windows 10 (10.0.22631)",
+    "platform": "Windows-10-10.0.22631-SP0",
+    "processor": "AMD64 Family 23 Model 104 Stepping 1, AuthenticAMD",
+    "python_version": "3.11.0",
+    "cpu_cores_physical": 8,
+    "cpu_cores_logical": 16,
+    "total_ram_gb": 13.85,
+    "opencv_version": "5.0.0",
+    "numpy_version": "2.4.6",
+    "numba_version": "0.67.0",
+    "cpu_model": "1801           AMD Ryzen 7 5700U with Radeon Graphics",
+    "gpu_accelerator": "CPU SIMD / OpenMP (AMD Ryzen / Intel AVX2 optimized)"
+  },
+  "benchmarks": {
+    "512x512": {
+      "resolution": "512x512",
+      "iterations": 1000,
+      "avg_ms": 16.42,
+      "min_ms": 14.48,
+      "max_ms": 26.39,
+      "p50_ms": 16.04,
+      "p95_ms": 19.72,
+      "p99_ms": 23.14,
+      "fps": 60.9,
+      "total_benchmark_time_sec": 16.65,
+      "stage_breakdown_avg_ms": {
+        "downsample_input": 0.578,
+        "ingest_preprocess": 1.524,
+        "log_transform": 0.637,
+        "noise_suppression": 0.266,
+        "spine_suppression": 1.426,
+        "rib_suppression": 1.234,
+        "lung_background_suppression": 1.96,
+        "coronary_enhancement": 1.949,
+        "contrast_enhancement": 3.536,
+        "output_quantization": 0.78,
+        "upsample_blend": 0.74
+      },
+      "passes_hard_constraint": true
+    },
+    "1024x1024": {
+      "resolution": "1024x1024",
+      "iterations": 1000,
+      "avg_ms": 17.87,
+      "min_ms": 16.68,
+      "max_ms": 24.18,
+      "p50_ms": 17.42,
+      "p95_ms": 21.19,
+      "p99_ms": 23.3,
+      "fps": 56.0,
+      "total_benchmark_time_sec": 18.75,
+      "stage_breakdown_avg_ms": {
+        "downsample_input": 1.537,
+        "ingest_preprocess": 1.457,
+        "log_transform": 0.605,
+        "noise_suppression": 0.254,
+        "spine_suppression": 1.364,
+        "rib_suppression": 1.174,
+        "lung_background_suppression": 2.036,
+        "coronary_enhancement": 1.814,
+        "contrast_enhancement": 3.357,
+        "output_quantization": 0.739,
+        "upsample_blend": 1.827
+      },
+      "passes_hard_constraint": true
+    }
+  },
+  "timestamp": "2026-09-21 16:11:03 UTC"
+}

@@ -1,0 +1,22 @@
+{
+  "num_frames": 30,
+  "width": 512,
+  "height": 512,
+  "fps": 15,
+  "difficulty": "hard",
+  "bit_depth": 16,
+  "vessel_anatomy": "LCA (LMCA, LAD, LCx, D1, D2, OM1)",
+  "simulated_effects": [
+    "contrast_inflow",
+    "cardiac_pulsation",
+    "respiratory_drift",
+    "vertebral_spine",
+    "oblique_ribs",
+    "bilateral_lungs",
+    "diaphragm",
+    "catheter",
+    "poisson_quantum_noise",
+    "electronic_read_noise",
+    "circular_collimator_shutter"
+  ]
+}

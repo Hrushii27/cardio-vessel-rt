@@ -1,0 +1,60 @@
+{
+  "ablation_results": [
+    {
+      "experiment": "Full Pipeline (All Active)",
+      "latency_ms": 29.8,
+      "cnr_enhanced": 3.93,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 16.1
+    },
+    {
+      "experiment": "w/o Noise Suppression",
+      "latency_ms": 31.51,
+      "cnr_enhanced": 5.1,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 15.6
+    },
+    {
+      "experiment": "w/o Spine Suppression",
+      "latency_ms": 27.87,
+      "cnr_enhanced": 3.16,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 15.1
+    },
+    {
+      "experiment": "w/o Rib Suppression",
+      "latency_ms": 30.52,
+      "cnr_enhanced": 3.81,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 15.9
+    },
+    {
+      "experiment": "w/o Lung Background Suppression",
+      "latency_ms": 27.25,
+      "cnr_enhanced": 2.78,
+      "bsr": 1.06,
+      "clutter_reduction_pct": 10.4
+    },
+    {
+      "experiment": "w/o Coronary Enhancement",
+      "latency_ms": 22.07,
+      "cnr_enhanced": 3.83,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 16.1
+    },
+    {
+      "experiment": "w/o Contrast Enhancement",
+      "latency_ms": 23.76,
+      "cnr_enhanced": 4.7,
+      "bsr": 1.09,
+      "clutter_reduction_pct": 16.1
+    },
+    {
+      "experiment": "Baseline (No Suppression/Enhancement)",
+      "latency_ms": 8.93,
+      "cnr_enhanced": 2.01,
+      "bsr": 0.99,
+      "clutter_reduction_pct": 0.0
+    }
+  ]
+}

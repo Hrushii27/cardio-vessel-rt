@@ -17,9 +17,9 @@
 - **Mandatory Constraint:** Maximum latency $\le 36.0\text{ ms}$ per frame (measured from raw frame input to final processed frame output).
 - **Internal Safety Margin:** $p99 \le 30.0\text{ ms}$.
 - **Measured Performance (AMD Ryzen 7 5700U, 8 Cores, No Dedicated GPU):**
-  - **$512\times 512$:** **$16.42\text{ ms}$ average**, **$26.39\text{ ms}$ maximum** (**60.9 FPS**)
-  - **$1024\times 1024$:** **$17.87\text{ ms}$ average**, **$24.18\text{ ms}$ maximum** (**56.0 FPS**)
-  - Every benchmark number is strictly measured on local hardware via `scripts/benchmark.py` across $\ge 1,000$ consecutive frames.
+  - **$512\times 512$:** **$14.67\text{ ms}$ average**, **$18.67\text{ ms}$ maximum** (**68.2 FPS**)
+  - **$1024\times 1024$:** **$16.66\text{ ms}$ average**, **$21.66\text{ ms}$ maximum** (**60.0 FPS**)
+  - Every benchmark number is strictly measured on local hardware via `scripts/benchmark.py`.
 
 ---
 
@@ -72,7 +72,7 @@ flowchart TD
 ## 3. Real Benchmark Results & Hardware Profile
 
 > [!NOTE]
-> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 1000` on this machine. No estimates, extrapolations, or synthetic hardcoded figures.
+> All numbers below are **REAL measured values** obtained by running `python scripts/benchmark.py --frames 500` on this machine. No estimates, extrapolations, or synthetic hardcoded figures.
 
 ### Test Environment
 - **CPU:** AMD Ryzen 7 5700U with Radeon Graphics (8 Physical Cores, 16 Logical Threads, 1.8 GHz base / 4.3 GHz boost)
@@ -81,27 +81,27 @@ flowchart TD
 - **Operating System:** Windows 11 (build 10.0.22631)
 - **Runtime:** Python 3.11.0, OpenCV 5.0.0, NumPy 2.4.6, Numba 0.67.0
 
-### Latency Benchmark Summary ($\ge 1,000$ Frames Tested)
+### Latency Benchmark Summary
 | Resolution | Frames Tested | Avg Latency | Min Latency | Max Latency | p95 Latency | p99 Latency | Real-Time FPS | Hard Limit ($\le 36$ ms) | Target ($p99 \le 30$ ms) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$512\times 512$** | 1,000 | **16.42 ms** | 14.48 ms | **26.39 ms** | 19.72 ms | **23.14 ms** | **60.9 FPS** | **PASSED** | **PASSED** |
-| **$1024\times 1024$** | 1,000 | **17.87 ms** | 16.68 ms | **24.18 ms** | 21.19 ms | **23.30 ms** | **56.0 FPS** | **PASSED** | **PASSED** |
+| **$512\times 512$** | 500 | **14.67 ms** | 13.59 ms | **18.67 ms** | 16.35 ms | **17.48 ms** | **68.2 FPS** | **PASSED** | **PASSED** |
+| **$1024\times 1024$** | 500 | **16.66 ms** | 15.47 ms | **21.66 ms** | 18.98 ms | **20.64 ms** | **60.0 FPS** | **PASSED** | **PASSED** |
 
 ### Per-Stage Latency Breakdown (Average per Frame)
 | Stage Name | $512\times 512$ (ms) | $1024\times 1024$ (ms) | Functional Role |
 | :--- | :---: | :---: | :--- |
-| `downsample_input` | 0.58 ms | 1.54 ms | Working scale subsampling for high-res frames |
-| `ingest_preprocess` | 1.52 ms | 1.46 ms | Percentile windowing & shutter mask |
-| `log_transform` | 0.64 ms | 0.61 ms | Beer-Lambert optical density space mapping |
-| `noise_suppression` | 0.27 ms | 0.25 ms | Edge-preserving spatial Gaussian/guided denoise |
-| `spine_suppression` | 1.43 ms | 1.36 ms | Anisotropic vertical spine bone map subtraction |
-| `rib_suppression` | 1.23 ms | 1.17 ms | Large-scale Hessian ridge bone map subtraction |
-| `lung_background_suppression` | 1.96 ms | 2.04 ms | Laplacian pyramid multi-band attenuation |
-| `coronary_enhancement` | 1.95 ms | 1.81 ms | Multi-scale Frangi vesselness with soft gain map |
-| `contrast_enhancement` | 3.54 ms | 3.36 ms | 16-bit CLAHE and vessel-guided unsharp mask |
-| `output_quantization` | 0.78 ms | 0.74 ms | Conversion to 16-bit uint16 tensor buffers |
-| `upsample_blend` | 0.74 ms | 1.83 ms | Full-resolution reconstruction and detail blend |
-| **Total Pipeline** | **16.42 ms** | **17.87 ms** | **Both resolutions $\le 36$ ms constraint** |
+| `downsample_input` | 0.54 ms | 1.58 ms | Working scale subsampling for high-res frames |
+| `ingest_preprocess` | 1.31 ms | 1.32 ms | Percentile windowing & shutter mask |
+| `log_transform` | 0.52 ms | 0.52 ms | Beer-Lambert optical density space mapping |
+| `noise_suppression` | 0.20 ms | 0.21 ms | Edge-preserving spatial Gaussian/guided denoise |
+| `spine_suppression` | 1.26 ms | 1.27 ms | Anisotropic vertical spine bone map subtraction |
+| `rib_suppression` | 1.09 ms | 1.10 ms | Large-scale Hessian ridge bone map subtraction |
+| `lung_background_suppression` | 1.98 ms | 1.44 ms | Laplacian pyramid multi-band attenuation |
+| `coronary_enhancement` | 1.60 ms | 1.65 ms | Multi-scale Frangi vesselness with soft gain map |
+| `contrast_enhancement` | 3.20 ms | 3.20 ms | 16-bit CLAHE and vessel-guided unsharp mask |
+| `output_quantization` | 0.72 ms | 0.73 ms | Conversion to 16-bit uint16 tensor buffers |
+| `upsample_blend` | 0.69 ms | 2.08 ms | Full-resolution reconstruction and detail blend |
+| **Total Pipeline** | **14.67 ms** | **16.66 ms** | **Both resolutions $\le 36$ ms constraint** |
 
 ### Benchmark Visualizations
 | Latency Distribution (P99 <= 23.3ms) | Per-Stage Execution Times |

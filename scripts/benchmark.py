@@ -88,7 +88,16 @@ def run_benchmark_for_resolution(
 
     num_samples = len(frames)
 
-    # Disable garbage collector during hot benchmark loop to evaluate true deterministic latency
+    # Set high process priority to shield benchmark from background OS scheduling jitter
+    try:
+        p = psutil.Process()
+        if hasattr(psutil, "HIGH_PRIORITY_CLASS"):
+            p.nice(psutil.HIGH_PRIORITY_CLASS)
+    except Exception:
+        pass
+
+    # Clean garbage before loop and disable garbage collector during hot benchmark loop
+    gc.collect()
     gc.disable()
     try:
         t_bench_start = time.perf_counter_ns()

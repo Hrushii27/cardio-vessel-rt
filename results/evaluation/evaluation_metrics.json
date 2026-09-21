@@ -1,0 +1,47 @@
+{
+  "Easy Case (High Contrast)": {
+    "cnr_raw": 2.17,
+    "cnr_processed": 4.6,
+    "cnr_enhanced": 3.83,
+    "cnr_improvement_ratio": 1.77,
+    "bsr": 1.09,
+    "background_energy_reduction_pct": 16.1,
+    "vessel_ssim": 0.543,
+    "contrast_retention": 1.83,
+    "dice": 0.285,
+    "noise_std_raw": 6.7,
+    "noise_std_proc": 0.0,
+    "noise_reduction_pct": 100.0,
+    "latency_ms": 30.01
+  },
+  "Average Case (Nominal Cine)": {
+    "cnr_raw": 2.14,
+    "cnr_processed": 4.65,
+    "cnr_enhanced": 3.93,
+    "cnr_improvement_ratio": 1.84,
+    "bsr": 1.09,
+    "background_energy_reduction_pct": 16.1,
+    "vessel_ssim": 0.548,
+    "contrast_retention": 1.81,
+    "dice": 0.286,
+    "noise_std_raw": 6.7,
+    "noise_std_proc": 0.0,
+    "noise_reduction_pct": 100.0,
+    "latency_ms": 34.15
+  },
+  "Hard Case (Low Contrast + High Noise)": {
+    "cnr_raw": 1.4,
+    "cnr_processed": 2.91,
+    "cnr_enhanced": 2.43,
+    "cnr_improvement_ratio": 1.73,
+    "bsr": 1.1,
+    "background_energy_reduction_pct": 17.1,
+    "vessel_ssim": 0.637,
+    "contrast_retention": 1.49,
+    "dice": 0.215,
+    "noise_std_raw": 9.7,
+    "noise_std_proc": 0.0,
+    "noise_reduction_pct": 100.0,
+    "latency_ms": 26.66
+  }
+}
